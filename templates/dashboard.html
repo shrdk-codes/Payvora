@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PayVora Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+     <link rel="icon" type="image/x-icon" href="Payvora.ico">
+    <link rel="stylesheet" href="../static/css/dash.css">
+<base target="_blank">
+</head>
+<body>
+    <!-- Desktop View -->
+    <div class="desktop-view">
+        <!-- Sidebar - No scrollbar visible but still scrollable -->
+        <div class="sidebar">
+            <!-- Logo -->
+            <div style="padding: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="logo-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <img src="../static/img/Payvora.svg" alt="PayVora" width="20" height="20" style="filter: brightness(0) invert(1);">
+            </div>
+            <span style="color: #fff; font-weight: 700; font-size: 20px;">PayVora</span>
+        </div>
+            </div>
+
+            <!-- Wallet Badge -->
+            <div style="padding: 0 16px 24px 16px;">
+                <div class="wallet-badge" style="border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #fff; font-weight: 700; font-size: 14px;">$</span>
+                    </div>
+                    <span style="color: #fff; font-weight: 500; font-size: 14px;">Phantom wallet</span>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav style="padding: 0 12px; display: flex; flex-direction: column; gap: 4px;">
+                <a href="#" class="nav-item active" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="layout-dashboard" style="width: 18px; height: 18px;"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="message-square" style="width: 18px; height: 18px;"></i>
+                    AI Chat
+                </a>
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="bot" style="width: 18px; height: 18px;"></i>
+                    Forge Agents
+                </a>
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="clock" style="width: 18px; height: 18px;"></i>
+                    Activity
+                </a>
+               
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="bar-chart-3" style="width: 18px; height: 18px;"></i>
+                    Analytics
+                </a>
+            </nav>
+
+            <!-- Sidebar Bottom -->
+            <div style="margin-top: 40px; padding: 16px; border-top: 1px solid #1A1A24;">
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="help-circle" style="width: 18px; height: 18px;"></i>
+                    Support
+                </a>
+                <a href="#" class="nav-item" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 14px; font-weight: 500;">
+                    <i data-lucide="settings-2" style="width: 18px; height: 18px;"></i>
+                    Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="balance-section">
+                    <span class="balance-label">USDC Agent</span>
+                    <div class="balance-row">
+                        <span class="balance-amount">$842.35</span>
+                        <span class="balance-change">+2.4%</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-outline">
+                        <i data-lucide="bot-message-square" style="width: 16px; height: 16px;"></i>
+                        Talk to Agent
+                    </button>
+                    <button class="btn-outline">
+                        <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i>
+                        New Agent
+                    </button>
+                    <button class="btn-primary">
+                        <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                        Send USDC
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="main-grid">
+                <!-- Left Column -->
+                <div class="left-col">
+                    <!-- Chat Widget -->
+                    <div class="widget-card">
+                        <div class="chat-header">
+                            <span class="section-title"><b>Dashboard</b></span>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <span style="color: #6B7280; font-size: 13px;">View</span>
+                                <button style="display: flex; align-items: center; gap: 6px; color: #9CA3AF; font-size: 13px; background: transparent; border: none; cursor: pointer;">
+                                    <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                                   User1
+                                    <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                            <div style="margin-bottom: 24px;">
+                                <p style="color: #9CA3AF; font-size: 13px; margin-bottom: 8px;">Chat</p>
+                                <div style="display: flex; align-items: center; gap: 8px; color: #D1D5DB; font-size: 14px;">
+                                    <span>Make transaction</span>
+                                    <div style="width: 24px; height: 24px; background: #22C55E; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px;">$</div>
+                                </div>
+                            </div>
+
+                            <div class="chat-bubble" style="margin-bottom: 24px; max-width: 400px;">
+                                <p style="color: #D1D5DB; font-size: 14px; line-height: 1.5;">Send 5000 USDC to Sharad Khadka</p>
+                            </div>
+
+                            <div class="transaction-preview" style="width: 100%; max-width: 380px;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                                    <span style="color: #9CA3AF; font-size: 13px;">Transaction Preview</span>
+                                </div>
+                                <p style="color: #6B7280; font-size: 12px; text-align: center; margin-bottom: 20px;">Send 20 SOL to bro</p>
+
+                                <button class="execute-btn" style="width: 100%;">
+                                    <i data-lucide="rocket" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>
+                                    Execute on Solana
+                                </button>
+                            </div>
+
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 380px; margin-top: 16px;">
+                                <button style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #4B5563; background: transparent; color: #9CA3AF; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+                                </button>
+                                <div style="width: 40px; height: 40px; background: #22C55E; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">$</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="widget-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <span class="section-title">Recent Activity</span>
+                            <button class="more-btn">
+                                <i data-lucide="more-horizontal" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div class="activity-item">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="icon-circle green">
+                                            <i data-lucide="check" style="width: 20px; height: 20px; color: #22C55E;"></i>
+                                        </div>
+                                        <span style="color: #fff; font-size: 14px; font-weight: 500;">Transaction</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 24px;">
+                                        <span style="color: #fff; font-size: 14px; font-weight: 500;">399,000</span>
+                                        <span class="stat-positive">+2020</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="icon-circle">
+                                            <i data-lucide="trending-up" style="width: 20px; height: 20px; color: #fff;"></i>
+                                        </div>
+                                        <span style="color: #fff; font-size: 14px; font-weight: 500;">Portfolio Update</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 24px;">
+                                        <span style="color: #fff; font-size: 14px; font-weight: 500;">251,000</span>
+                                        <span style="color: #fff; font-size: 14px; font-weight: 500;">4007</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-col">
+                    <!-- Active Agents -->
+                    <div class="widget-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <span style="color: #fff; font-size: 14px; font-weight: 600;">Active Agents</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="more-btn">
+                                    <i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i>
+                                </button>
+                                <button class="more-btn">
+                                    <i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="agent-card remittance">
+                                <div class="agent-avatar">
+                                    <img src="../static/img/Payvora.svg" alt="Agent"/>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-bar" style="height: 16px;"></div>
+                                    <div class="mini-bar" style="height: 24px;"></div>
+                                    <div class="mini-bar" style="height: 12px;"></div>
+                                    <div class="mini-bar" style="height: 32px;"></div>
+                                    <div class="mini-bar" style="height: 20px;"></div>
+                                </div>
+                                <span class="agent-name">Remittance Agent</span>
+                            </div>
+
+                            <div class="agent-card yield">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="sprout" style="width: 20px; height: 20px; color: white;"></i>
+                                </div>
+                                <div class="mini-chart">
+                                    <div class="mini-bar" style="height: 20px;"></div>
+                                    <div class="mini-bar" style="height: 32px;"></div>
+                                    <div class="mini-bar" style="height: 16px;"></div>
+                                    <div class="mini-bar" style="height: 28px;"></div>
+                                    <div class="mini-bar" style="height: 12px;"></div>
+                                </div>
+                                <span class="agent-name">Yield Farmer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marketplace -->
+                    <div class="widget-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <span style="color: #fff; font-size: 14px; font-weight: 600;">Marketplace</span>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="more-btn">
+                                    <i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i>
+                                </button>
+                                <button class="more-btn">
+                                    <i data-lucide="more-horizontal" style="width: 14px; height: 14px;"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="marketplace-card">
+                                <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #06B6D4, #3B82F6); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);">
+                                        <span style="color: white; font-weight: 700; font-size: 16px;">$</span>
+                                    </div>
+                                </div>
+                                <span style="color: #fff; font-size: 12px; font-weight: 500;">Merchant Pay</span>
+                            </div>
+
+                            <div class="marketplace-card remittance">
+                                <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="send" style="width: 24px; height: 24px; color: white;"></i>
+                                </div>
+                                <span style="color: #fff; font-size: 12px; font-weight: 500;">Remittance Agent</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portfolio Flow -->
+                    <div class="widget-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <span style="color: #fff; font-size: 14px; font-weight: 600;">Portfolio Flow</span>
+                            <button class="more-btn">
+                                <i data-lucide="more-horizontal" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+
+                        <div class="bar-chart">
+                            <div class="bar" style="height: 35%; opacity: 0.6;"></div>
+                            <div class="bar" style="height: 55%; opacity: 0.7;"></div>
+                            <div class="bar" style="height: 85%; opacity: 0.9;"></div>
+                            <div class="bar" style="height: 50%; opacity: 0.7;"></div>
+                            <div class="bar" style="height: 65%; opacity: 0.8;"></div>
+                            <div class="bar" style="height: 95%; opacity: 1;"></div>
+                            <div class="bar" style="height: 40%; opacity: 0.6;"></div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>0</span>
+                            <span>200</span>
+                            <span>400</span>
+                        </div>
+                    </div>
+
+                    <!-- USDC Flow -->
+                    <div class="widget-card">
+                        <div style="margin-bottom: 8px;">
+                            <span style="color: #fff; font-size: 14px; font-weight: 600;">USDC Flow</span>
+                        </div>
+                        <p style="color: #6B7280; font-size: 12px; margin-bottom: 16px;">Portfolio Performance</p>
+
+                        <div class="line-chart">
+                            <svg width="100%" height="100%" viewBox="0 0 280 80" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#7C3AED"/>
+                                        <stop offset="100%" style="stop-color:#A78BFA"/>
+                                    </linearGradient>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#7C3AED;stop-opacity:0.3"/>
+                                        <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0,60 Q40,55 70,52 T140,40 T210,30 T280,15" 
+                                      fill="none" stroke="url(#lineGradient)" stroke-width="2.5" stroke-linecap="round"/>
+                                <path d="M0,60 Q40,55 70,52 T140,40 T210,30 T280,15 L280,80 L0,80 Z" 
+                                      fill="url(#areaGradient)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <!-- Mobile View -->
+<div class="mobile-view">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="mobile-logo">
+            <div class="mobile-logo-icon">
+                <img src="../static/img/Payvora.svg" width="18" height="18" alt="PayVora">
+            </div>
+            <span class="mobile-logo-text">PayVora</span>
+        </div>
+        <div class="mobile-bell">
+            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+        </div>
+    </div>
+
+    <!-- Mobile Content -->
+    <div class="mobile-content-area">
+        <!-- Wallet Card -->
+        <div class="mobile-wallet-card">
+            <div class="mobile-wallet-header">
+                <div class="mobile-wallet-left">
+                    <div class="mobile-phantom-icon">
+                        <i data-lucide="wallet" style="width: 16px; height: 16px; color: white;"></i>
+                    </div>
+                    <span class="mobile-phantom-text">Phantom</span>
+                </div>
+                <div class="mobile-connected-badge">
+                    <i data-lucide="check-circle-2" style="width: 18px; height: 18px; color: #22C55E;"></i>
+                </div>
+            </div>
+            <p class="mobile-wallet-subtext">Connected Wallet</p>
+            <div class="mobile-balance-row">
+                <span class="mobile-balance">$842.35</span>
+                <span class="mobile-usdc-label">USDC</span>
+                <span class="mobile-change-badge">+2.4%</span>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="mobile-stats">
+            <div class="mobile-stat-card">
+                <p class="mobile-stat-label">Active Agents</p>
+                <p class="mobile-stat-value">1</p>
+            </div>
+            <div class="mobile-stat-card">
+                <p class="mobile-stat-label">Total Sent</p>
+                <p class="mobile-stat-value">12.4k USDC</p>
+            </div>
+        </div>
+
+        <!-- Home/Dashboard Section -->
+        <div class="mobile-section-header">
+            <span class="mobile-section-title">Home/Dashboard</span>
+           
+        </div>
+
+        <!-- Talk Button -->
+        <button class="mobile-talk-btn">
+            <span>Talk to Your Agent</span>
+            <i data-lucide="mic" style="width: 20px; height: 20px;"></i>
+        </button>
+
+        <!-- Recent Activity Section -->
+        <div class="mobile-section-header">
+            <span class="mobile-section-title">Recent Activity</span>
+        </div>
+        
+        <!-- Added mobile activity items -->
+        <div class="mobile-activity-list">
+            <div class="mobile-activity-item">
+                <div class="mobile-activity-icon">
+                    <i data-lucide="check" style="width: 16px; height: 16px; color: #22C55E;"></i>
+                </div>
+                <div class="mobile-activity-info">
+                    <span class="mobile-activity-title">Transaction</span>
+                    <span class="mobile-activity-time">2 min ago</span>
+                </div>
+                <span class="mobile-activity-amount">+2020</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <a href="#" class="mobile-nav-item active">
+            <i data-lucide="home" class="mobile-nav-icon"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i data-lucide="message-square" class="mobile-nav-icon"></i>
+            <span>Chat</span>
+        </a>
+        <a href="#" class="mobile-nav-center">
+            <img src="../static/img/Payvora.svg" width="24" height="24" alt="PayVora">
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i data-lucide="clock" class="mobile-nav-icon"></i>
+            <span>Activity</span>
+        </a>
+        <a href="#" class="mobile-nav-item">
+            <i data-lucide="user" class="mobile-nav-icon"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+</div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
