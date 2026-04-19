@@ -17,7 +17,7 @@ if (loginBtn) {
             window.location.href = 'dashboard.html';
         } catch (error) {
             console.error("Auth Error:", error);
-            alert("Login failed. Please try again.");
+            alert("Something went wrong. Please try again.");
         }
     });
 }
