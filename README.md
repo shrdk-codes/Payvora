@@ -31,6 +31,6 @@ A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **F
 ## Progress / Milestones
 
 - **Week 1:** Created basic pages (landing, login, dashboard)
-- **Week 2:** Added Firebase Authentication + improved dashboard UI
+- **Week 2:** Added Firebase Authentication + wallet connectivity
 
 
