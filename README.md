@@ -4,7 +4,7 @@
 ![Alt](https://github.com/shrdk-codes/Payvora/blob/97c2b5dce4e152f1000f72281803cb2ed0ade038/Payvora.png)
 
 
-A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **Firebase (CDN)** for **Authentication** and **Solana/web3 and phantom wallet connection cdn
+A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **Firebase (CDN)** for **Authentication** and Solana/web3 and phantom wallet connection cdn
 
 > **Stack (current):** Vanilla JS + Firebase CDN + Firebase Auth
 
@@ -34,6 +34,3 @@ A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **F
 - **Week 2:** Added Firebase Authentication + improved dashboard UI
 
 
-## License
-
-Add a license if you plan to open-source this project (e.g., MIT).
