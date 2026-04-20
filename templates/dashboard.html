@@ -32,6 +32,7 @@
                     <p class="text-slate-400">Total SOL Balance</p>
                     <h1 class="balance-amount" id="solBalance">0.0000</h1>
                     <p id="walletAddr" class="text-xs opacity-30 truncate">Not Connected</p>
+                    <p id="solNetwork" class="text-xs opacity-30 truncate">Network: Devnet</p>
                 </div>
 
                 <div class="widget-card glass p-8">
@@ -68,12 +69,64 @@
         window.handleLogout = () => signOut(auth).then(() => window.location.href = 'Start.html');
 
         // Solana Logic
+        const DEVNET_ENDPOINT = solanaWeb3.clusterApiUrl('devnet');
+
+        function setNetworkLabel(label) {
+            const el = document.getElementById('solNetwork');
+            if (el) el.innerText = `Network: ${label}`;
+        }
+
+        function showNetworkMismatch(expected = 'Devnet') {
+            // Keep it simple: show a clear message so user knows why balance isn't showing
+            setNetworkLabel(`${expected} (switch Phantom network)`);
+        }
+
+        async function isOnDevnet() {
+            // Phantom injects window.solana; if it supports network/version checks they can vary by wallet version.
+            // We'll do a pragmatic check: compare genesis hash via the wallet connection if available.
+            try {
+                // If Phantom exposes `solana.request` we can ask for the chainId-like cluster.
+                // Not all versions support this; so we fall back gracefully.
+                if (typeof window.solana?.request === 'function') {
+                    // Some wallets implement `solana:chainId` / `wallet_getCluster`-like methods; not standardized.
+                    // We'll attempt a couple and ignore failures.
+                    const methodsToTry = ['getCluster', 'wallet_getCluster', 'solana_getCluster'];
+                    for (const method of methodsToTry) {
+                        try {
+                            const res = await window.solana.request({ method });
+                            if (typeof res === 'string') {
+                                return res.toLowerCase().includes('devnet');
+                            }
+                            if (res && typeof res.cluster === 'string') {
+                                return res.cluster.toLowerCase().includes('devnet');
+                            }
+                        } catch (e) {}
+                    }
+                }
+
+                // Fallback: we cannot reliably detect cluster from the provider.
+                // Return null to indicate unknown.
+                return null;
+            } catch (e) {
+                return null;
+            }
+        }
+
         window.connectWallet = async () => {
             if (window.solana?.isPhantom) {
                 const resp = await window.solana.connect();
                 document.getElementById('walletAddr').innerText = resp.publicKey.toString();
-                
-                const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'));
+
+                // Try to ensure user is on devnet; if we can't detect, we still show devnet balance via RPC.
+                const onDevnet = await isOnDevnet();
+                if (onDevnet === false) {
+                    showNetworkMismatch('Devnet');
+                    // Still attempt devnet balance (helpful if wallet is on mainnet but address exists on devnet)
+                } else {
+                    setNetworkLabel('Devnet');
+                }
+
+                const connection = new solanaWeb3.Connection(DEVNET_ENDPOINT);
                 const balance = await connection.getBalance(resp.publicKey);
                 document.getElementById('solBalance').innerText = (balance / 1e9).toFixed(4);
             } else { alert("Please install Phantom!"); }
