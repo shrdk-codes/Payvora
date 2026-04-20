@@ -25,7 +25,7 @@ A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **F
 
 
 ## Live at 
-[Payvora](payvora-sigma.vercel.app). 
+[Visit Payvora](https://payvora-sigma.vercel.app/)
 
 
 ## Progress / Milestones
