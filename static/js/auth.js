@@ -17,7 +17,7 @@ try {
   if (result?.user) {
     console.log("User logged in:", result.user);
     // Start.html and dashboard.html are both in /templates
-    window.location.replace("dashboard.html");
+    window.location.replace("./templates/dashboard.html");
   }
 } catch (error) {
   console.error("Redirect Auth Error:", error);
