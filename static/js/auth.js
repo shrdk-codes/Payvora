@@ -12,32 +12,34 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// 1. Handle Redirect Result
-try {
-  const result = await getRedirectResult(auth);
-  if (result?.user) {
-    console.log("Login successful, redirecting...");
-    window.location.replace("dashboard.html");
-  }
-} catch (error) {
-  console.error("Auth Error:", error);
-}
+// Log to see if the script is even running
+console.log("Auth script loaded. Current path:", window.location.pathname);
 
-// 2. The "Observer" (Safety Net)
-// This catches the user if the redirect result was already processed
+// Handle the redirect result
+getRedirectResult(auth)
+  .then((result) => {
+    if (result?.user) {
+      console.log("Redirect success! Target: dashboard.html");
+      window.location.assign("dashboard.html"); 
+    }
+  }).catch(err => console.error("Redirect error:", err));
+
+// The Observer - This catches the session even if getRedirectResult is weird
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Check if we are still on the login page (start.html)
+    console.log("Observer: User is logged in as", user.email);
+    
+    // Only redirect if we are currently on the start/login page
     if (window.location.pathname.includes("start.html")) {
-      window.location.replace("dashboard.html");
+      console.log("On start.html with active session. Moving to dashboard...");
+      window.location.assign("dashboard.html");
     }
+  } else {
+    console.log("Observer: No active session found.");
   }
 });
 
-// 3. Login Trigger
 const loginBtn = document.getElementById("googleLoginBtn");
 if (loginBtn) {
-  loginBtn.addEventListener("click", () => {
-    signInWithRedirect(auth, provider);
-  });
+  loginBtn.onclick = () => signInWithRedirect(auth, provider);
 }
