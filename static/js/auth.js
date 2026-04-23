@@ -19,20 +19,24 @@ console.log("Auth script loaded. Current path:", window.location.pathname);
 getRedirectResult(auth)
   .then((result) => {
     if (result?.user) {
-      console.log("Redirect success! Target: dashboard.html");
-      window.location.assign("dashboard.html"); 
+      console.log("Redirect success! Target: /templates/dashboard.html");
+      window.location.assign("/templates/dashboard.html");
     }
   }).catch(err => console.error("Redirect error:", err));
+
+// Helper: case-insensitive check for Start.html
+const pathLower = window.location.pathname.toLowerCase();
+const isOnStartPage = pathLower.includes("/start.html") || pathLower.endsWith("start.html");
 
 // The Observer - This catches the session even if getRedirectResult is weird
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("Observer: User is logged in as", user.email);
-    
+
     // Only redirect if we are currently on the start/login page
-    if (window.location.pathname.includes("start.html")) {
-      console.log("On start.html with active session. Moving to dashboard...");
-      window.location.assign("dashboard.html");
+    if (isOnStartPage) {
+      console.log("On Start.html with active session. Moving to dashboard...");
+      window.location.assign("/templates/dashboard.html");
     }
   } else {
     console.log("Observer: No active session found.");

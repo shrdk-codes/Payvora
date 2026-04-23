@@ -65,8 +65,8 @@
         const functions = getFunctions(app);
 
         // Auth Guard
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'Start.html'; });
-        window.handleLogout = () => signOut(auth).then(() => window.location.href = 'Start.html');
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = '/templates/Start.html'; });
+        window.handleLogout = () => signOut(auth).then(() => window.location.href = '/templates/Start.html');
 
         // Solana Logic
         const DEVNET_ENDPOINT = solanaWeb3.clusterApiUrl('devnet');
