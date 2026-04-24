@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   GoogleAuthProvider,
   onAuthStateChanged,
   setPersistence,
@@ -10,79 +9,56 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Standardize URLs - ensure these match your actual folder structure
+// Standardize Paths
 const DASHBOARD_URL = "/templates/dashboard.html";
 const START_URL = "/templates/start.html";
 
-// State flag to prevent the "Auth Observer" from redirecting 
-// while we are still checking the result of a login redirect.
-let isInitializing = true;
-
-// 1. Check for redirect result immediately on page load
-getRedirectResult(auth)
-  .then((result) => {
-    if (result?.user) {
-      console.log("Redirect success! User:", result.user.email);
-      // Immediately move to dashboard if login just finished
-      window.location.replace(DASHBOARD_URL);
-    } else {
-      // No redirect result found, let the observer take over
-      isInitializing = false;
-      checkCurrentState();
-    }
-  })
-  .catch((error) => {
-    console.error("Redirect Error:", error.code, error.message);
-    isInitializing = false;
-    checkCurrentState();
-  });
-
-// 2. Auth State Observer
+// 1. Auth Observer: Controls access to the dashboard
 onAuthStateChanged(auth, (user) => {
-  if (isInitializing) return; // Wait for getRedirectResult first
-  
   const path = window.location.pathname.toLowerCase();
   const isOnDashboard = path.includes("dashboard.html");
-  const isOnStart = path.includes("start.html");
 
   if (user) {
-    // User is logged in
-    if (isOnStart) {
-      window.location.replace(DASHBOARD_URL);
+    console.log("User detected:", user.email);
+    // If logged in and on Start page, move to Dashboard
+    if (path.includes("start.html")) {
+      window.location.assign(DASHBOARD_URL);
     }
   } else {
-    // User is NOT logged in
+    // If NOT logged in and trying to view Dashboard, kick to Start
     if (isOnDashboard) {
-      console.warn("Unauthorized access. Returning to start...");
-      window.location.replace(START_URL);
+      console.warn("No session. Redirecting to login...");
+      window.location.assign(START_URL);
     }
   }
 });
 
-// Helper to trigger logic if getRedirectResult is null
-function checkCurrentState() {
-  const user = auth.currentUser;
-  const path = window.location.pathname.toLowerCase();
-  if (user && path.includes("start.html")) {
-    window.location.replace(DASHBOARD_URL);
-  }
-}
-
-// 3. Button Click Handler
+// 2. Login Button: Using the Popup Method
 const loginBtn = document.getElementById("googleLoginBtn");
 if (loginBtn) {
   loginBtn.addEventListener("click", async () => {
     try {
+      // Step A: Ensure the session is saved locally
       await setPersistence(auth, browserLocalPersistence);
-      // Start the redirect flow
-      await signInWithRedirect(auth, provider);
+      
+      // Step B: Open the Google Popup
+      const result = await signInWithPopup(auth, provider);
+      
+      if (result.user) {
+        console.log("Login Successful!");
+        // Step C: Manually redirect to dashboard immediately
+        window.location.assign(DASHBOARD_URL);
+      }
     } catch (error) {
-      console.error("Login Trigger Error:", error);
-      alert("Failed to start login. Check console.");
+      console.error("Login failed:", error.code, error.message);
+      if (error.code === 'auth/popup-blocked') {
+        alert("Please enable popups for this website to log in.");
+      }
     }
   });
 }
