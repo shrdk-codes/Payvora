@@ -1,64 +1,51 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence
+import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Standardize Paths
-const DASHBOARD_URL = "/templates/dashboard.html";
-const START_URL = "/templates/start.html";
+// Force Chrome to recognize the user gesture
+provider.setCustomParameters({ prompt: 'select_account' });
 
-// 1. Auth Observer: Controls access to the dashboard
+const loginBtn = document.getElementById('googleLoginBtn');
+
+// 1. PROTECTION LOGIC: If a user tries to access dashboard.html without a session
 onAuthStateChanged(auth, (user) => {
-  const path = window.location.pathname.toLowerCase();
-  const isOnDashboard = path.includes("dashboard.html");
-
-  if (user) {
-    console.log("User detected:", user.email);
-    // If logged in and on Start page, move to Dashboard
-    if (path.includes("start.html")) {
-      window.location.assign(DASHBOARD_URL);
+    const isDashboard = window.location.pathname.includes("dashboard.html");
+    if (!user && isDashboard) {
+        console.warn("No user found, kicking to start page.");
+        window.location.replace("start.html"); 
     }
-  } else {
-    // If NOT logged in and trying to view Dashboard, kick to Start
-    if (isOnDashboard) {
-      console.warn("No session. Redirecting to login...");
-      window.location.assign(START_URL);
-    }
-  }
 });
 
-// 2. Login Button: Using the Popup Method
-const loginBtn = document.getElementById("googleLoginBtn");
+// 2. LOGIN LOGIC
 if (loginBtn) {
-  loginBtn.addEventListener("click", async () => {
-    try {
-      // Step A: Ensure the session is saved locally
-      await setPersistence(auth, browserLocalPersistence);
-      
-      // Step B: Open the Google Popup
-      const result = await signInWithPopup(auth, provider);
-      
-      if (result.user) {
-        console.log("Login Successful!");
-        // Step C: Manually redirect to dashboard immediately
-        window.location.assign(DASHBOARD_URL);
-      }
-    } catch (error) {
-      console.error("Login failed:", error.code, error.message);
-      if (error.code === 'auth/popup-blocked') {
-        alert("Please enable popups for this website to log in.");
-      }
-    }
-  });
+    loginBtn.addEventListener('click', async (e) => {
+        e.preventDefault(); // Prevents any weird form reloads
+        console.log("Attempting login...");
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            if (result.user) {
+                console.log("Login Success:", result.user.email);
+                // Use replace to prevent the user from clicking "back" to the login page
+                window.location.replace("dashboard.html");
+            }
+        } catch (error) {
+            console.error("Full Auth Error Object:", error);
+            
+            if (error.code === 'auth/popup-blocked') {
+                alert("Chrome blocked the popup! Please click the icon in the URL bar to allow popups for this site.");
+            } else {
+                alert("Error: " + error.message);
+            }
+        }
+    });
 }
