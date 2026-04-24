@@ -13,11 +13,24 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // --- Path detection ---
-const path = window.location.pathname.toLowerCase();
-const isOnStartPage = path.includes("/start.html") || path.endsWith("/start");
-const isOnDashboard = path.includes("/dashboard.html") || path.includes("/templates/dashboard");
+const path = window.location.pathname;
+const pathLower = path.toLowerCase();
 
-console.log("Auth script loaded. Path:", window.location.pathname);
+// Support both local dev (maybe /Start.html) and deployed (/templates/Start.html)
+const isOnStartPage =
+  pathLower.endsWith("/templates/start.html") ||
+  pathLower.endsWith("/start.html") ||
+  pathLower.endsWith("/start");
+
+const isOnDashboard =
+  pathLower.endsWith("/templates/dashboard.html") ||
+  pathLower.endsWith("/dashboard.html") ||
+  pathLower.includes("/templates/dashboard");
+
+const DASHBOARD_URL = "/templates/dashboard.html";
+const LOGIN_URL = "/templates/Start.html";
+
+console.log("Auth script loaded. Path:", path);
 
 // --- Handle redirect result (one-time, after OAuth callback) ---
 let redirectHandled = false;
@@ -25,10 +38,14 @@ let redirectHandled = false;
 getRedirectResult(auth)
   .then((result) => {
     redirectHandled = true;
+
     if (result?.user) {
       console.log("Redirect result: success", result.user.email);
-      if (isOnStartPage) {
-        window.location.replace("/templates/dashboard.html");
+
+      // After returning from Google, we can be on /templates/Start.html.
+      // Always move authenticated users to the dashboard.
+      if (!isOnDashboard) {
+        window.location.replace(DASHBOARD_URL);
       }
     } else {
       console.log("Redirect result: no user (normal if not coming from login)");
@@ -44,21 +61,21 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("Observer: User logged in as", user.email);
 
-    // Only redirect if we're on the login page AND we didn't just handle a redirect
-    // (avoids double-redirect and prevents loop if dashboard loads this script)
-    if (isOnStartPage && !redirectHandled) {
-      console.log("On start page with active session. Moving to dashboard...");
-      window.location.replace("/templates/dashboard.html");
+    // If user is logged in and still on the login page, go to dashboard.
+    // Note: We do NOT gate on redirectHandled; onAuthStateChanged can fire
+    // before getRedirectResult resolves, and we still want to leave Start.
+    if (isOnStartPage) {
+      console.log("On Start page with active session. Moving to dashboard...");
+      window.location.replace(DASHBOARD_URL);
     }
-    
-    // If already on dashboard, do nothing — stay here
   } else {
     console.log("Observer: No active session.");
-    
-    // Optional: kick unauthenticated users back to login from protected pages
+
+    // Kick unauthenticated users back to login from protected pages.
+    // IMPORTANT: login lives under /templates/Start.html on Vercel.
     if (isOnDashboard) {
       console.log("On dashboard without session. Redirecting to login...");
-      window.location.replace("/start.html"); // or wherever your login is
+      window.location.replace(LOGIN_URL);
     }
   }
 });
