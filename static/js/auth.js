@@ -4,7 +4,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   GoogleAuthProvider,
-  onAuthStateChanged
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
@@ -32,7 +34,7 @@ const LOGIN_URL = "/templates/Start.html";
 
 console.log("Auth script loaded. Path:", path);
 
-// --- Handle redirect result (one-time, after OAuth callback) ---
+// --- Handle redirect result (after OAuth callback) ---
 let redirectHandled = false;
 
 getRedirectResult(auth)
@@ -42,8 +44,7 @@ getRedirectResult(auth)
     if (result?.user) {
       console.log("Redirect result: success", result.user.email);
 
-      // After returning from Google, we can be on /templates/Start.html.
-      // Always move authenticated users to the dashboard.
+      // If we are authenticated after redirect, ensure we're on dashboard.
       if (!isOnDashboard) {
         window.location.replace(DASHBOARD_URL);
       }
@@ -62,8 +63,8 @@ onAuthStateChanged(auth, (user) => {
     console.log("Observer: User logged in as", user.email);
 
     // If user is logged in and still on the login page, go to dashboard.
-    // Note: We do NOT gate on redirectHandled; onAuthStateChanged can fire
-    // before getRedirectResult resolves, and we still want to leave Start.
+    // We do NOT gate on redirectHandled because onAuthStateChanged may fire
+    // before getRedirectResult resolves.
     if (isOnStartPage) {
       console.log("On Start page with active session. Moving to dashboard...");
       window.location.replace(DASHBOARD_URL);
@@ -72,7 +73,6 @@ onAuthStateChanged(auth, (user) => {
     console.log("Observer: No active session.");
 
     // Kick unauthenticated users back to login from protected pages.
-    // IMPORTANT: login lives under /templates/Start.html on Vercel.
     if (isOnDashboard) {
       console.log("On dashboard without session. Redirecting to login...");
       window.location.replace(LOGIN_URL);
@@ -83,8 +83,16 @@ onAuthStateChanged(auth, (user) => {
 // --- Login button ---
 const loginBtn = document.getElementById("googleLoginBtn");
 if (loginBtn) {
-  loginBtn.addEventListener("click", () => {
+  loginBtn.addEventListener("click", async () => {
     console.log("Initiating Google redirect...");
+
+    // Ensure auth session survives full-page redirects in production.
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (e) {
+      console.warn("Failed to set persistence, continuing anyway:", e);
+    }
+
     signInWithRedirect(auth, provider);
   });
 }
