@@ -3,46 +3,76 @@ import {
     getAuth, 
     signInWithPopup, 
     GoogleAuthProvider, 
-    onAuthStateChanged 
+    onAuthStateChanged,
+    browserLocalPersistence,
+    setPersistence 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
+// 1. Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
 
 const loginBtn = document.getElementById('googleLoginBtn');
 
-// 1. DUAL-PURPOSE AUTH MONITOR
-onAuthStateChanged(auth, (user) => {
-    const isDashboard = window.location.pathname.includes("dashboard.html");
-    const isStartPage = window.location.pathname.includes("start.html");
+/**
+ * PROTECTION LOGIC
+ * We use 'isInitializing' to prevent the race condition that causes loops.
+ */
+let isInitializing = true;
 
-    if (user && isStartPage) {
-        window.location.replace("dashboard.html");
-    } else if (!user && isDashboard) {
-        window.location.replace("start.html");
+onAuthStateChanged(auth, (user) => {
+    isInitializing = false; 
+    const path = window.location.pathname;
+    const isDashboard = path.includes("dashboard.html");
+    const isStartPage = path.includes("start.html") || path === "/";
+
+    if (user) {
+        console.log("User detected:", user.email);
+        // If logged in and on start page, move to dashboard
+        if (isStartPage) {
+            window.location.replace("dashboard.html");
+        }
+    } else {
+        // If NOT logged in and trying to see dashboard, kick to start
+        if (isDashboard) {
+            console.warn("Access denied. Redirecting to login...");
+            window.location.replace("start.html");
+        }
     }
 });
 
-// 2. THE INSTANT POPUP (No async/await here to preserve user gesture)
+/**
+ * LOGIN LOGIC
+ * Must be synchronous and immediate to prevent "Popup Blocked" errors.
+ */
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        
-        console.log("Triggering popup immediately...");
 
-        // CRITICAL: No code can come before this line. 
-        // No 'await', no 'fetch', no 'if' statements.
-        signInWithPopup(auth, provider)
+        // Step A: Set persistence first (Optional but recommended)
+        setPersistence(auth, browserLocalPersistence)
+            .then(() => {
+                // Step B: Trigger popup IMMEDIATELY after the click
+                return signInWithPopup(auth, provider);
+            })
             .then((result) => {
-                console.log("Success!");
+                console.log("Login successful!");
+                // The onAuthStateChanged above will handle the redirect automatically,
+                // but we call it here too for speed.
                 window.location.replace("dashboard.html");
             })
             .catch((error) => {
-                console.error("Firebase Error Code:", error.code);
+                console.error("Auth Error:", error.code);
+                
                 if (error.code === 'auth/popup-blocked') {
-                    alert("Chrome is still blocking the window. Try this: \n1. Look at the URL bar for a 'red x' icon.\n2. Click it and select 'Always allow'.\n3. REFRESH THE PAGE (Required!)");
+                    alert("Popup blocked! Please check your URL bar and allow popups for this site, then refresh.");
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    console.log("User closed the window.");
+                } else {
+                    alert("Error: " + error.message);
                 }
             });
     });
