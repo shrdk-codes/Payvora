@@ -1,78 +1,33 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-    getAuth, 
-    signInWithPopup, 
-    GoogleAuthProvider, 
-    onAuthStateChanged,
-    browserLocalPersistence,
-    setPersistence 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { firebaseConfig } from "./config.js";
-
-// 1. Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
-
-const loginBtn = document.getElementById('googleLoginBtn');
-
-/**
- * PROTECTION LOGIC
- * We use 'isInitializing' to prevent the race condition that causes loops.
- */
-let isInitializing = true;
-
-onAuthStateChanged(auth, (user) => {
-    isInitializing = false; 
-    const path = window.location.pathname;
-    const isDashboard = path.includes("dashboard.html");
-    const isStartPage = path.includes("start.html") || path === "/";
-
-    if (user) {
-        console.log("User detected:", user.email);
-        // If logged in and on start page, move to dashboard
-        if (isStartPage) {
-            window.location.replace("dashboard.html");
-        }
-    } else {
-        // If NOT logged in and trying to see dashboard, kick to start
-        if (isDashboard) {
-            console.warn("Access denied. Redirecting to login...");
-            window.location.replace("start.html");
-        }
-    }
-});
-
-/**
- * LOGIN LOGIC
- * CRITICAL: Popup MUST be triggered synchronously within the click event
- * Do NOT await setPersistence before signInWithPopup - browsers block delayed popups
- */
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        
+        // Disable button to prevent double clicks
+        loginBtn.disabled = true;
 
         // Set persistence in background (fire and forget)
         setPersistence(auth, browserLocalPersistence).catch(err => 
             console.warn("Persistence error:", err)
         );
 
-        // Trigger popup IMMEDIATELY (synchronously within click handler)
+        // Trigger popup IMMEDIATELY
         signInWithPopup(auth, provider)
             .then((result) => {
                 console.log("Login successful!");
                 window.location.replace("dashboard.html");
             })
             .catch((error) => {
-                console.error("Auth Error:", error.code);
+                console.error("Auth Error Code:", error.code);
+                console.error("Auth Error Message:", error.message);
                 
                 if (error.code === 'auth/popup-blocked') {
-                    alert("Popup blocked! Please check your URL bar and allow popups for this site, then refresh.");
+                    alert("❌ Popup blocked! Please:\n1. Check your browser's popup settings\n2. Add this site to popup exceptions\n3. Try again");
                 } else if (error.code === 'auth/popup-closed-by-user') {
                     console.log("User closed the window.");
+                    loginBtn.disabled = false;
                 } else {
                     alert("Error: " + error.message);
+                    loginBtn.disabled = false;
                 }
             });
     });
