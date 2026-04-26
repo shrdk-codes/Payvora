@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayVora Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="../static/img/Payvora.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script src="https://bundle.run/buffer@6.0.3"></script>
     <script>window.Buffer = window.Buffer || buffer.Buffer;</script>
@@ -13,44 +16,100 @@
     <link rel="stylesheet" href="../static/css/dash.css">
 </head>
 <body>
-    <div class="desktop-view">
+    <!-- Mobile top bar -->
+    <header class="mobile-header">
+        <div class="mobile-logo">
+            <img src="../static/img/Payvora.svg" alt="PayVora" class="logo-img">
+            <span class="logo-text">PayVora</span>
+        </div>
+        <button class="icon-btn" onclick="handleLogout()" aria-label="Logout">
+            <i data-lucide="log-out"></i>
+        </button>
+    </header>
+
+    <div class="app-layout">
+        <!-- Desktop sidebar -->
         <aside class="sidebar">
-            <div class="flex items-center gap-3 mb-10">
-                <img src="../static/img/Payvora.svg" width="30">
-                <span class="text-xl font-bold">PayVora</span>
+            <div class="sidebar-logo">
+                <img src="../static/img/Payvora.svg" alt="PayVora" class="logo-img">
+                <span class="logo-text">PayVora</span>
             </div>
-            <nav>
-                <div class="nav-item active"><i data-lucide="layout-dashboard"></i>Dashboard</div>
-                <div class="nav-item" onclick="connectWallet()"><i data-lucide="wallet"></i>Connect Phantom</div>
-                <div class="nav-item" onclick="handleLogout()"><i data-lucide="log-out"></i>Logout</div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="connectWallet()">
+                    <i data-lucide="wallet"></i>
+                    <span>Connect Phantom</span>
+                </div>
+                <div class="nav-item" onclick="handleLogout()">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </div>
             </nav>
         </aside>
 
         <main class="main-content">
+            <div class="page-header">
+                <h2 class="page-title">Dashboard</h2>
+                <p class="page-subtitle">Welcome to your PayVora workspace</p>
+            </div>
+
             <div class="dashboard-grid">
-                <div class="balance-card glass">
-                    <p class="text-slate-400">Total SOL Balance</p>
+                <!-- Balance Card -->
+                <div class="card balance-card">
+                    <div class="card-label">
+                        <i data-lucide="coins"></i>
+                        <span>Total SOL Balance</span>
+                    </div>
                     <h1 class="balance-amount" id="solBalance">0.0000</h1>
-                    <p id="walletAddr" class="text-xs opacity-30 truncate">Not Connected</p>
-                    <p id="solNetwork" class="text-xs opacity-30 truncate">Network: Devnet</p>
+                    <div class="wallet-info">
+                        <p id="walletAddr" class="wallet-addr">Not Connected</p>
+                        <p id="solNetwork" class="network-badge">Devnet</p>
+                    </div>
+                    <button class="btn-primary connect-btn" onclick="connectWallet()">
+                        <i data-lucide="wallet"></i>
+                        Connect Phantom
+                    </button>
                 </div>
 
-                <div class="widget-card glass p-8">
-                    <div class="flex items-center gap-3 mb-4">
-                        <i data-lucide="sparkles" class="text-indigo-500"></i>
-                        <h3 class="font-bold">PayVora AI Assistant</h3>
+                <!-- AI Assistant Card -->
+                <div class="card ai-card">
+                    <div class="card-header">
+                        <i data-lucide="sparkles"></i>
+                        <h3>PayVora AI Assistant</h3>
                     </div>
                     <div id="aiChat" class="chat-container">
-                        <p class="text-slate-500 italic">Ready to analyze your wallet...</p>
+                        <p class="chat-placeholder">Ready to analyze your wallet...</p>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="aiInput" placeholder="Ask about your assets...">
-                        <button onclick="askAI()" class="bg-indigo-600 px-6 py-2 rounded-xl font-bold hover:bg-indigo-500 transition">Ask</button>
+                    <div class="chat-input-row">
+                        <input type="text" id="aiInput" placeholder="Ask about your assets..." autocomplete="off" aria-label="Ask AI about your assets">
+                        <button onclick="askAI()" class="btn-primary ask-btn">
+                            <i data-lucide="send"></i>
+                            <span>Ask</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Mobile bottom navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-item active">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="mobile-nav-item" onclick="connectWallet()">
+            <i data-lucide="wallet"></i>
+            <span>Wallet</span>
+        </div>
+        <div class="mobile-nav-item" onclick="handleLogout()">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+        </div>
+    </nav>
 
     <script>lucide.createIcons();</script>
 
