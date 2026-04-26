@@ -1,11 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
-    signInWithPopup, 
+    signInWithRedirect,
     GoogleAuthProvider, 
     onAuthStateChanged,
     browserLocalPersistence,
-    setPersistence 
+    setPersistence,
+    getRedirectResult
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
@@ -14,132 +15,77 @@ console.log("🚀 Auth script loading...");
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-console.log("✅ Firebase initialized:", auth.app.options.projectId);
+console.log("✅ Firebase initialized");
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-let loginBtn = null;
-let isSetup = false;
+// Set persistence
+setPersistence(auth, browserLocalPersistence)
+    .then(() => console.log("✅ Persistence set"))
+    .catch(err => console.warn("⚠️ Persistence error:", err));
 
-// Function to setup login button
-function setupLoginButton() {
-    if (isSetup) return;
-    
-    loginBtn = document.getElementById('googleLoginBtn');
-    
-    if (!loginBtn) {
-        console.warn("⚠️ Button #googleLoginBtn not found yet, will retry...");
-        setTimeout(setupLoginButton, 100);
-        return;
-    }
-    
-    isSetup = true;
-    console.log("✅ Button found and setting up click handler");
-    
-    loginBtn.addEventListener('click', handleLoginClick);
-}
-
-// Handle login button click
-function handleLoginClick(e) {
-    e.preventDefault();
-    console.log("🖱️ Login button clicked");
-    
-    if (loginBtn.disabled) {
-        console.warn("⚠️ Button already processing, ignoring click");
-        return;
-    }
-    
-    loginBtn.disabled = true;
-    const originalText = loginBtn.textContent;
-    loginBtn.textContent = "Loading...";
-    loginBtn.style.opacity = "0.6";
-
-    // Set persistence in background
-    setPersistence(auth, browserLocalPersistence)
-        .then(() => console.log("✅ Persistence set"))
-        .catch(err => console.warn("⚠️ Persistence error:", err));
-
-    // Trigger popup immediately after click
-    console.log("🔓 Triggering Firebase popup...");
-    
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            console.log("✅ Login successful! User:", result.user.email);
+// CRITICAL: Check if user is RETURNING from Google login redirect
+console.log("🔍 Checking for redirect result...");
+getRedirectResult(auth)
+    .then((result) => {
+        if (result && result.user) {
+            console.log("✅✅✅ LOGIN SUCCESSFUL!", result.user.email);
             window.location.replace("dashboard.html");
-        })
-        .catch((error) => {
-            console.error("❌ Auth Error - Code:", error.code);
-            console.error("❌ Auth Error - Message:", error.message);
-            
-            // Re-enable button
-            loginBtn.disabled = false;
-            loginBtn.textContent = originalText;
-            loginBtn.style.opacity = "1";
-            
-            // Show specific error messages
-            if (error.code === 'auth/popup-blocked') {
-                console.warn("🚫 POPUP BLOCKED - User must enable popups");
-                alert("❌ POPUP BLOCKED\n\nPlease enable popups:\n1. Click 🔒 or ⓘ icon in URL bar\n2. Select 'Continue allowing' or 'Always allow'\n3. Refresh page and try again");
-            } 
-            else if (error.code === 'auth/popup-closed-by-user') {
-                console.log("👤 User closed the popup window");
-            } 
-            else if (error.code === 'auth/network-request-failed') {
-                console.error("🌐 NETWORK ERROR");
-                alert("❌ Network Error\n\nCheck your internet connection and try again");
-            }
-            else if (error.code === 'auth/cancelled-popup-request') {
-                console.log("⏸️ Popup request cancelled");
-            }
-            else {
-                console.error("❌ Unexpected error:", error);
-                alert("❌ Error: " + (error.message || error.code));
-            }
-        });
-}
+        }
+    })
+    .catch((error) => {
+        console.error("❌ Redirect error:", error.code);
+    });
 
-// Try to setup button immediately if DOM is ready
-console.log("📍 Document ready state:", document.readyState);
+// Setup login button
+let loginBtn = document.getElementById('googleLoginBtn');
 
-if (document.readyState === 'loading') {
-    console.log("⏳ DOM still loading, waiting for DOMContentLoaded...");
+if (!loginBtn) {
     document.addEventListener('DOMContentLoaded', () => {
-        console.log("✅ DOMContentLoaded fired");
-        setupLoginButton();
+        loginBtn = document.getElementById('googleLoginBtn');
+        setupButton();
     });
 } else {
-    console.log("✅ DOM already loaded, setting up button now");
-    setupLoginButton();
+    setupButton();
 }
 
-// Also try after a small delay as backup
-setTimeout(() => {
-    if (!isSetup) {
-        console.log("📍 Retry setup after 500ms");
-        setupLoginButton();
+function setupButton() {
+    if (!loginBtn) {
+        console.warn("❌ Button not found");
+        return;
     }
-}, 500);
+    
+    console.log("✅ Button found");
+    
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log("🖱️ Login clicked");
+        
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Opening Google...";
+        
+        // Use REDIRECT instead of POPUP - cannot be blocked!
+        signInWithRedirect(auth, provider)
+            .catch((error) => {
+                console.error("❌ Error:", error.code);
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Continue with Google";
+            });
+    });
+}
 
-// Monitor auth state changes
-console.log("🔐 Setting up auth state listener...");
-
+// Check auth state
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        console.log("✅ User is logged in:", user.email);
+        console.log("✅ User logged in:", user.email);
         const path = window.location.pathname;
-        if (path.includes("Start.html") || path === "/" || path.endsWith("templates/")) {
-            console.log("📍 User on login page, redirecting to dashboard...");
+        if (path.includes("Start.html") || path === "/" || path.includes("templates")) {
             window.location.replace("dashboard.html");
         }
     } else {
-        console.log("❌ User is logged out");
-        const path = window.location.pathname;
-        if (path.includes("dashboard.html")) {
-            console.log("🚫 User on dashboard without login, redirecting to login...");
-            window.location.replace("../templates/Start.html");
-        }
+        console.log("❌ User not logged in");
     }
 });
 
-console.log("✨ Auth module fully loaded and ready");
+console.log("✨ Auth ready!");
