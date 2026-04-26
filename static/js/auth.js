@@ -12,7 +12,6 @@ import { firebaseConfig } from "./config.js";
 
 console.log("🚀 Auth script loading...");
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 console.log("✅ Firebase initialized");
@@ -20,21 +19,26 @@ console.log("✅ Firebase initialized");
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-// Set persistence
 setPersistence(auth, browserLocalPersistence)
-    .then(() => console.log("✅ Persistence set"))
     .catch(err => console.warn("⚠️ Persistence error:", err));
 
-// CRITICAL: Check if user is RETURNING from Google login redirect
+// Flags to prevent infinite loop
+let redirectProcessed = false;
+let authStateProcessed = false;
+
+// Check redirect result
 console.log("🔍 Checking for redirect result...");
 getRedirectResult(auth)
     .then((result) => {
+        redirectProcessed = true;
         if (result && result.user) {
             console.log("✅✅✅ LOGIN SUCCESSFUL!", result.user.email);
-            window.location.replace("dashboard.html");
+        } else {
+            console.log("📍 No redirect result");
         }
     })
     .catch((error) => {
+        redirectProcessed = true;
         console.error("❌ Redirect error:", error.code);
     });
 
@@ -51,10 +55,7 @@ if (!loginBtn) {
 }
 
 function setupButton() {
-    if (!loginBtn) {
-        console.warn("❌ Button not found");
-        return;
-    }
+    if (!loginBtn) return;
     
     console.log("✅ Button found");
     
@@ -65,7 +66,6 @@ function setupButton() {
         loginBtn.disabled = true;
         loginBtn.textContent = "Opening Google...";
         
-        // Use REDIRECT instead of POPUP - cannot be blocked!
         signInWithRedirect(auth, provider)
             .catch((error) => {
                 console.error("❌ Error:", error.code);
@@ -75,16 +75,39 @@ function setupButton() {
     });
 }
 
-// Check auth state
+// Handle auth state - but WAIT for redirect to complete first
 onAuthStateChanged(auth, (user) => {
+    // Wait for redirect result to be processed
+    if (!redirectProcessed) {
+        console.log("⏳ Waiting for redirect...");
+        return;
+    }
+    
+    // Only process once
+    if (authStateProcessed) {
+        console.log("✓ Auth already processed");
+        return;
+    }
+    
+    authStateProcessed = true;
+    const path = window.location.pathname;
+    
     if (user) {
         console.log("✅ User logged in:", user.email);
-        const path = window.location.pathname;
+        
+        // Only redirect FROM login page TO dashboard
         if (path.includes("Start.html") || path === "/" || path.includes("templates")) {
+            console.log("📍 Redirecting to dashboard");
             window.location.replace("dashboard.html");
         }
     } else {
         console.log("❌ User not logged in");
+        
+        // Only redirect FROM dashboard TO login
+        if (path.includes("dashboard.html")) {
+            console.log("🚫 Redirecting to login");
+            window.location.replace("../templates/Start.html");
+        }
     }
 });
 
