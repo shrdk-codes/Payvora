@@ -46,22 +46,22 @@ onAuthStateChanged(auth, (user) => {
 
 /**
  * LOGIN LOGIC
- * Must be synchronous and immediate to prevent "Popup Blocked" errors.
+ * CRITICAL: Popup MUST be triggered synchronously within the click event
+ * Do NOT await setPersistence before signInWithPopup - browsers block delayed popups
  */
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
 
-        // Step A: Set persistence first (Optional but recommended)
-        setPersistence(auth, browserLocalPersistence)
-            .then(() => {
-                // Step B: Trigger popup IMMEDIATELY after the click
-                return signInWithPopup(auth, provider);
-            })
+        // Set persistence in background (fire and forget)
+        setPersistence(auth, browserLocalPersistence).catch(err => 
+            console.warn("Persistence error:", err)
+        );
+
+        // Trigger popup IMMEDIATELY (synchronously within click handler)
+        signInWithPopup(auth, provider)
             .then((result) => {
                 console.log("Login successful!");
-                // The onAuthStateChanged above will handle the redirect automatically,
-                // but we call it here too for speed.
                 window.location.replace("dashboard.html");
             })
             .catch((error) => {
