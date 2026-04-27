@@ -1,12 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
-    signInWithRedirect,
+    signInWithPopup,
     GoogleAuthProvider, 
     onAuthStateChanged,
     browserLocalPersistence,
-    setPersistence,
-    getRedirectResult
+    setPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
@@ -22,30 +21,6 @@ provider.setCustomParameters({ prompt: 'select_account' });
 setPersistence(auth, browserLocalPersistence)
     .catch(err => console.warn("⚠️ Persistence error:", err));
 
-// Single flag - only process redirect result once
-let redirectChecked = false;
-
-// Check redirect result first; once resolved, run the auth-state handler
-// in case onAuthStateChanged already fired before getRedirectResult completed.
-console.log("🔍 Checking for redirect result...");
-getRedirectResult(auth)
-    .then((result) => {
-        if (result && result.user) {
-            console.log("✅✅✅ LOGIN SUCCESSFUL!", result.user.email);
-        } else {
-            console.log("📍 No redirect result");
-        }
-    })
-    .catch((error) => {
-        console.error("❌ Redirect error:", error.code);
-    })
-    .finally(() => {
-        redirectChecked = true;
-        // onAuthStateChanged may have already fired while redirectChecked was false;
-        // manually check current user now so navigation is not skipped.
-        handleAuthState(auth.currentUser);
-    });
-
 // Setup login button
 let loginBtn = document.getElementById('googleLoginBtn');
 
@@ -60,7 +35,6 @@ if (!loginBtn) {
 
 function setupButton() {
     if (!loginBtn) return;
-    
     console.log("✅ Button found");
     
     loginBtn.addEventListener('click', (e) => {
@@ -70,49 +44,39 @@ function setupButton() {
         loginBtn.disabled = true;
         loginBtn.textContent = "Opening Google...";
         
-        signInWithRedirect(auth, provider)
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                console.log("✅ Login successful:", result.user.email);
+                // Direct navigation - NO onAuthStateChanged redirect
+                window.location.href = "dashboard.html";
+            })
             .catch((error) => {
-                console.error("❌ Error:", error.code);
+                console.error("❌ Auth Error:", error.code);
                 loginBtn.disabled = false;
                 loginBtn.textContent = "Continue with Google";
+                
+                if (error.code === 'auth/popup-blocked') {
+                    alert("❌ Popup blocked!\n\nPlease enable popups and try again");
+                } else if (error.code !== 'auth/popup-closed-by-user') {
+                    alert("Error: " + error.message);
+                }
             });
     });
 }
 
-// Handle auth state changes - wait for redirect result to be processed first
+// ONLY check on page load - NOT on every auth change
+console.log("🔐 Checking auth on page load...");
+
 onAuthStateChanged(auth, (user) => {
-    if (!redirectChecked) {
-        // getRedirectResult hasn't resolved yet; handleAuthState will be called
-        // manually from the getRedirectResult .finally() handler.
-        console.log("⏳ Redirect not checked yet, will handle after redirect resolves...");
-        return;
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    if (!user && currentPage === 'dashboard.html') {
+        console.log("🚫 Dashboard: No user → redirect to login");
+        window.location.href = "templates/Start.html";
+    } else if (user && currentPage === 'Start.html') {
+        console.log("✅ Login page: User logged in → redirect to dashboard");
+        window.location.href = "dashboard.html";
     }
-    handleAuthState(user);
 });
-
-function handleAuthState(user) {
-    // Only compare the filename, not the full path, to avoid partial-match loops
-    const filename = window.location.pathname.split('/').pop() || '';
-    console.log("📄 Current page:", filename);
-
-    if (user) {
-        console.log("✅ User logged in:", user.email);
-
-        // Only redirect FROM Start.html (login page) → dashboard.
-        // An empty filename means the path is "/" (root), which should also go to dashboard.
-        if (filename === 'Start.html' || filename === '') {
-            console.log("📍 On login page, redirecting to dashboard");
-            window.location.replace("dashboard.html");
-        }
-    } else {
-        console.log("❌ User NOT logged in");
-
-        // Only redirect FROM dashboard.html → login
-        if (filename === 'dashboard.html') {
-            console.log("🚫 On dashboard without login, redirecting to Start");
-            window.location.replace("../templates/Start.html");
-        }
-    }
-}
 
 console.log("✨ Auth ready!");
