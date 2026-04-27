@@ -305,6 +305,38 @@ body {
     font-size: 0.87rem;
 }
 
+/* ── Chat message variants ────────────── */
+.chat-msg {
+    margin-bottom: 8px;
+}
+
+.chat-msg-user b { color: var(--text); }
+
+.chat-msg-ai b { color: #818cf8; }
+
+.chat-msg-ai.thinking { color: var(--text-dim); font-style: italic; }
+
+.chat-msg-error { color: #f87171; }
+
+.chat-msg-success { color: #4ade80; }
+
+.command-badge {
+    background: rgba(234, 179, 8, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.35);
+    border-radius: var(--radius-sm);
+    color: #fbbf24;
+    font-size: 0.82rem;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+.confirm-cmd-btn {
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
 /* ── Chat input row ───────────────────── */
 .chat-input-row {
     display: flex;
