@@ -22,15 +22,14 @@ provider.setCustomParameters({ prompt: 'select_account' });
 setPersistence(auth, browserLocalPersistence)
     .catch(err => console.warn("⚠️ Persistence error:", err));
 
-// Flags to prevent infinite loop
-let redirectProcessed = false;
-let authStateProcessed = false;
+// Single flag - only process redirect result once
+let redirectChecked = false;
 
-// Check redirect result
+// Check redirect result first; once resolved, run the auth-state handler
+// in case onAuthStateChanged already fired before getRedirectResult completed.
 console.log("🔍 Checking for redirect result...");
 getRedirectResult(auth)
     .then((result) => {
-        redirectProcessed = true;
         if (result && result.user) {
             console.log("✅✅✅ LOGIN SUCCESSFUL!", result.user.email);
         } else {
@@ -38,8 +37,13 @@ getRedirectResult(auth)
         }
     })
     .catch((error) => {
-        redirectProcessed = true;
         console.error("❌ Redirect error:", error.code);
+    })
+    .finally(() => {
+        redirectChecked = true;
+        // onAuthStateChanged may have already fired while redirectChecked was false;
+        // manually check current user now so navigation is not skipped.
+        handleAuthState(auth.currentUser);
     });
 
 // Setup login button
@@ -75,40 +79,40 @@ function setupButton() {
     });
 }
 
-// Handle auth state - but WAIT for redirect to complete first
+// Handle auth state changes - wait for redirect result to be processed first
 onAuthStateChanged(auth, (user) => {
-    // Wait for redirect result to be processed
-    if (!redirectProcessed) {
-        console.log("⏳ Waiting for redirect...");
+    if (!redirectChecked) {
+        // getRedirectResult hasn't resolved yet; handleAuthState will be called
+        // manually from the getRedirectResult .finally() handler.
+        console.log("⏳ Redirect not checked yet, will handle after redirect resolves...");
         return;
     }
-    
-    // Only process once
-    if (authStateProcessed) {
-        console.log("✓ Auth already processed");
-        return;
-    }
-    
-    authStateProcessed = true;
-    const path = window.location.pathname;
-    
+    handleAuthState(user);
+});
+
+function handleAuthState(user) {
+    // Only compare the filename, not the full path, to avoid partial-match loops
+    const filename = window.location.pathname.split('/').pop() || '';
+    console.log("📄 Current page:", filename);
+
     if (user) {
         console.log("✅ User logged in:", user.email);
-        
-        // Only redirect FROM login page TO dashboard
-        if (path.includes("Start.html") || path === "/" || path.includes("templates")) {
-            console.log("📍 Redirecting to dashboard");
+
+        // Only redirect FROM Start.html (login page) → dashboard.
+        // An empty filename means the path is "/" (root), which should also go to dashboard.
+        if (filename === 'Start.html' || filename === '') {
+            console.log("📍 On login page, redirecting to dashboard");
             window.location.replace("dashboard.html");
         }
     } else {
-        console.log("❌ User not logged in");
-        
-        // Only redirect FROM dashboard TO login
-        if (path.includes("dashboard.html")) {
-            console.log("🚫 Redirecting to login");
+        console.log("❌ User NOT logged in");
+
+        // Only redirect FROM dashboard.html → login
+        if (filename === 'dashboard.html') {
+            console.log("🚫 On dashboard without login, redirecting to Start");
             window.location.replace("../templates/Start.html");
         }
     }
-});
+}
 
 console.log("✨ Auth ready!");
