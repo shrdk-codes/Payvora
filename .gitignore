@@ -1,0 +1,13 @@
+# Firebase Functions build output and dependencies
+functions/lib/
+functions/node_modules/
+
+# Local environment files (never commit API keys)
+.env
+.env.local
+.env*.local
+.runtimeconfig.json
+
+# OS artefacts
+.DS_Store
+Thumbs.db
