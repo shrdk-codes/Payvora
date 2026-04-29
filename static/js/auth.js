@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
+    signInWithPopup,
     signInWithRedirect,
     GoogleAuthProvider, 
     browserLocalPersistence,
@@ -15,26 +16,40 @@ const provider = new GoogleAuthProvider();
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-// Add this to check auth state on page load
+// Check if already signed in on page load
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        window.location.href = "dashboard.html";
+        window.location.href = "/templates/dashboard.html";
     }
 });
 
 const loginBtn = document.getElementById('googleLoginBtn');
 
 if (loginBtn) {
-    loginBtn.addEventListener('click', (e) => {
+    loginBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         loginBtn.disabled = true;
-        loginBtn.textContent = "Redirecting to Google...";
+        loginBtn.textContent = "Opening Google...";
         
-        signInWithRedirect(auth, provider)
-            .catch((error) => {
-                console.error("❌ Error:", error.code);
+        try {
+            await signInWithPopup(auth, provider);
+            console.log("✅ Logged in via popup");
+            window.location.href = "/templates/dashboard.html";
+        } catch (error) {
+            if (error.code === 'auth/popup-blocked') {
+                console.log("Popup blocked, falling back to redirect");
+                try {
+                    await signInWithRedirect(auth, provider);
+                } catch (redirectError) {
+                    console.error("Redirect error:", redirectError.code);
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "Continue with Google";
+                }
+            } else {
+                console.error("Popup error:", error.code);
                 loginBtn.disabled = false;
                 loginBtn.textContent = "Continue with Google";
-            });
+            }
+        }
     });
 }
