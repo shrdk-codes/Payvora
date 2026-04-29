@@ -1,10 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
-    signInWithRedirect,
+    signInWithPopup, 
     GoogleAuthProvider, 
-    onAuthStateChanged,
-    getRedirectResult
+    onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
@@ -12,39 +11,48 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// 1. Handle the result of the redirect FIRST
-getRedirectResult(auth)
-    .then((result) => {
-        if (result?.user) {
-            // Success! Now we move to dashboard
-            window.location.replace("/templates/dashboard.html");
-        }
-    })
-    .catch((error) => {
-        console.error("Redirect Error:", error.code, error.message);
-        // If there's an error (like the user closed the window), 
-        // stay on this page and re-enable the button
-        const loginBtn = document.getElementById('googleLoginBtn');
-        if (loginBtn) {
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Continue with Google";
-        }
-    });
-
-// 2. Only use onAuthStateChanged for users who are ALREADY logged in
+// 1. Silent Check: If already logged in, just move them.
+// This handles the "session" so they don't have to click login every time.
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Use .replace instead of .href to prevent "back button" loops
-        window.location.replace("/templates/dashboard.html");
+        window.location.assign("/templates/dashboard.html");
     }
 });
 
 const loginBtn = document.getElementById('googleLoginBtn');
+
 if (loginBtn) {
-    loginBtn.addEventListener('click', (e) => {
+    loginBtn.addEventListener('click', async (e) => {
         e.preventDefault();
+        
+        // Visual feedback
         loginBtn.disabled = true;
-        loginBtn.textContent = "Redirecting...";
-        signInWithRedirect(auth, provider);
+        loginBtn.textContent = "Opening Google...";
+
+        try {
+            // STRATEGY: Call signInWithPopup immediately. 
+            // Browsers only allow popups if they are the direct result of a click.
+            const result = await signInWithPopup(auth, provider);
+            
+            if (result.user) {
+                console.log("Success!");
+                window.location.assign("/templates/dashboard.html");
+            }
+        } catch (error) {
+            console.error("Popup Error:", error.code);
+            
+            // Handle the specific "Blocked" error
+            if (error.code === 'auth/popup-blocked') {
+                alert("Please allow popups for this website to sign in, or check your browser settings.");
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                alert("Login cancelled. Please try again.");
+            } else {
+                alert("Error: " + error.message);
+            }
+            
+            // Reset button if it fails
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Continue with Google";
+        }
     });
 }
