@@ -1,10 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
     getAuth, 
-    signInWithPopup,
+    signInWithRedirect,
     GoogleAuthProvider, 
     browserLocalPersistence,
-    setPersistence
+    setPersistence,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
@@ -14,19 +15,22 @@ const provider = new GoogleAuthProvider();
 
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
+// Add this to check auth state on page load
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        window.location.href = "dashboard.html";
+    }
+});
+
 const loginBtn = document.getElementById('googleLoginBtn');
 
 if (loginBtn) {
     loginBtn.addEventListener('click', (e) => {
         e.preventDefault();
         loginBtn.disabled = true;
-        loginBtn.textContent = "Opening Google...";
+        loginBtn.textContent = "Redirecting to Google...";
         
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                console.log("✅ Logged in:", result.user.email);
-                window.location.href = "dashboard.html";
-            })
+        signInWithRedirect(auth, provider)
             .catch((error) => {
                 console.error("❌ Error:", error.code);
                 loginBtn.disabled = false;
