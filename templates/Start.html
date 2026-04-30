@@ -36,15 +36,16 @@
         </div>
     </div>
 
-    <script>lucide.createIcons();</script>
     <script>
+        lucide.createIcons();
         document.getElementById('googleLoginBtn').addEventListener('click', function () {
-            const btn = this;
+            var btn = this;
             btn.disabled = true;
-            btn.textContent = 'Logging in with Google...';
+            var textNode = Array.from(btn.childNodes).find(function (n) { return n.nodeType === Node.TEXT_NODE; });
+            if (textNode) { textNode.textContent = ' Logging in with Google...'; }
             setTimeout(function () {
-                window.location.href = '/templates/dashboard.html';
-            }, 2000);
+                window.location.href = './dashboard.html';
+            }, 1500);
         });
     </script>
 </body>
