@@ -11,15 +11,20 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+const loginBtn = document.getElementById('googleLoginBtn');
+const authLoader = document.getElementById('authLoader');
+
 // 1. Silent Check: If already logged in, just move them.
 // This handles the "session" so they don't have to click login every time.
 onAuthStateChanged(auth, (user) => {
     if (user) {
         window.location.assign("/templates/dashboard.html");
+    } else {
+        // Not logged in — hide the loader and reveal the login button.
+        if (authLoader) authLoader.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = '';
     }
 });
-
-const loginBtn = document.getElementById('googleLoginBtn');
 
 if (loginBtn) {
     loginBtn.addEventListener('click', async (e) => {
