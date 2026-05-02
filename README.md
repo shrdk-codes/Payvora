@@ -32,5 +32,7 @@ A lightweight web app built with **HTML, CSS, and Vanilla JavaScript** using **F
 
 - **Week 1:** Created basic pages (landing, login, dashboard)
 - **Week 2:** Added Firebase Authentication + wallet connectivity
+- **Week 3:** Integrated AI agents using API of gpt oss 120B from open router
+- **Week 4:** Testing and Submission
 
 
