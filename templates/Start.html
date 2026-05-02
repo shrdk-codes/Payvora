@@ -48,12 +48,38 @@
 
         .logo-section {
             margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Option 2: Logo Glow Wrapper */
+        .logo-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            /* Radial glow effect */
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .logo-img {
             width: 64px;
             height: 64px;
-            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 1;
+            /* Subtle boost to the SVG colors */
+            filter: brightness(1.1) contrast(1.1);
         }
 
         .logo-text {
@@ -62,6 +88,8 @@
             font-weight: 800;
             letter-spacing: -0.025em;
             margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
 
         .welcome-text {
@@ -107,7 +135,6 @@
             font-size: 0.75rem;
         }
 
-        /* Spinner Animation */
         .spinner {
             animation: rotate 2s linear infinite;
             display: none;
@@ -124,8 +151,10 @@
 
     <div class="login-container glass-strong">
         <div class="logo-section">
-            <!-- Restored your original logo asset path -->
-            <img src="../static/img/Payvora.svg" alt="PayVora" class="logo-img">
+            <!-- Logo with Brightness Wrapper -->
+            <div class="logo-wrapper">
+                <img src="../static/img/Payvora.svg" alt="PayVora" class="logo-img">
+            </div>
             <h1 class="logo-text">PayVora</h1>
             <p class="welcome-text">Sign in to manage your assets</p>
         </div>
@@ -172,6 +201,7 @@
             btnText.textContent = 'Logging in...';
 
             setTimeout(function () {
+                // Adjusting destination to match your project structure
                 window.location.href = './dashboard.html';
             }, 1500);
         });
